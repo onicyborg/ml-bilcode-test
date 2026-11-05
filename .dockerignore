@@ -10,5 +10,10 @@ __pycache__
 .env.*
 *.log
 experiments
-artifacts/*/
+artifacts/three-class-taco
+artifacts/before-clothes-feedback
+artifacts/before-metal-feedback
+artifacts/before-paper-feedback
+artifacts/baseline-v1
+artifacts/whole-image-10class
 test
