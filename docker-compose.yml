@@ -1,0 +1,20 @@
+name: siklus-ml
+services:
+  ml:
+    image: ${IMAGE:?IMAGE is required}
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks:
+      siklus:
+        aliases: [ml]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
+  siklus:
+    external: true
+    name: siklus

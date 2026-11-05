@@ -1,0 +1,15 @@
+[project]
+name = "siklus-waste-ml"
+version = "1.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "tensorflow-cpu==2.20.0",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
+    "python-multipart>=0.0.22,<1",
+    "pillow>=11,<13",
+    "opencv-python-headless>=4.10,<5",
+]
+
+[dependency-groups]
+dev = ["scikit-learn>=1.6,<2", "matplotlib>=3.10,<4"]

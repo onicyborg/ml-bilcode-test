@@ -1,0 +1,34 @@
+[
+  {
+    "path": "garbage-331929_1280.jpg",
+    "expected": "METAL",
+    "predicted": "METAL",
+    "confidence": 0.9994903802871704,
+    "modelVersion": "mobilenetv2-feedback-b5d5aef88ddd",
+    "usage": "train-only regression"
+  },
+  {
+    "path": "dfb516527888492042cc019a0ce9c6a0.jpg",
+    "expected": "GLASS",
+    "predicted": "GLASS",
+    "confidence": 0.5288583636283875,
+    "modelVersion": "mobilenetv2-feedback-b5d5aef88ddd",
+    "usage": "train-only regression"
+  },
+  {
+    "path": "Pengolahan-Kertas-Bekas-dan-Bahaya-Sampah-Kertas.jpg",
+    "expected": "PAPER",
+    "predicted": "PAPER",
+    "confidence": 0.9903045296669006,
+    "modelVersion": "mobilenetv2-feedback-b5d5aef88ddd",
+    "usage": "train-only regression"
+  },
+  {
+    "path": "piles-of-used-clothes.jpg",
+    "expected": "CLOTHES",
+    "predicted": "CLOTHES",
+    "confidence": 0.9974179267883301,
+    "modelVersion": "mobilenetv2-feedback-b5d5aef88ddd",
+    "usage": "train-only regression"
+  }
+]

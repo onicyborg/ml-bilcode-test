@@ -1,0 +1,24 @@
+{
+  "examples": [
+    {
+      "path": "garbage-331929_1280.jpg",
+      "category": "METAL",
+      "labelBasis": "User-confirmed dominant material: rusty metal cans in a mixed scene."
+    },
+    {
+      "path": "dfb516527888492042cc019a0ce9c6a0.jpg",
+      "category": "GLASS",
+      "labelBasis": "User-confirmed glass bottles; retained as a training correction."
+    },
+    {
+      "path": "Pengolahan-Kertas-Bekas-dan-Bahaya-Sampah-Kertas.jpg",
+      "category": "PAPER",
+      "labelBasis": "User-confirmed pile of discarded newspapers and paper."
+    },
+    {
+      "path": "piles-of-used-clothes.jpg",
+      "category": "CLOTHES",
+      "labelBasis": "User-confirmed pile of discarded clothing."
+    }
+  ]
+}

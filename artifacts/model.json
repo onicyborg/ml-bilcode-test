@@ -1,0 +1,21 @@
+{
+  "modelVersion": "mobilenetv2-feedback-b5d5aef88ddd",
+  "classes": [
+    "ORGANIC",
+    "PLASTIC",
+    "PAPER",
+    "GLASS",
+    "METAL",
+    "CARDBOARD",
+    "CLOTHES",
+    "FOOTWEAR",
+    "BATTERY",
+    "OTHER"
+  ],
+  "imageSize": 160,
+  "sha256": "b5d5aef88ddd4e4919d98e23a3bb818a88503d2e824c77ad651ee57fee23e6f5",
+  "inference": {
+    "policy": "bottle_consensus_v1",
+    "detectorSha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
+  }
+}

@@ -1,0 +1,86 @@
+name: Build and deploy
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: development-deploy
+  cancel-in-progress: false
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Check deployment configuration
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_ENV: ${{ secrets.VPS_ENV }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: test -n "$VPS_HOST" && test -n "$VPS_USER" && test -n "$VPS_ENV" && test -n "$VPS_SSH_KEY" && test -n "$VPS_KNOWN_HOSTS"
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:development
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_SSH_PASSPHRASE: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$VPS_SSH_KEY" && test -n "$VPS_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          if [ -n "$VPS_SSH_PASSPHRASE" ]; then
+            printf '#!/bin/sh\nprintf "%%s\n" "$VPS_SSH_PASSPHRASE"\n' > ~/.ssh/askpass
+            chmod 700 ~/.ssh/askpass
+            eval "$(ssh-agent -s)"
+            SSH_ASKPASS="$HOME/.ssh/askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=:0 ssh-add ~/.ssh/id_ed25519 </dev/null
+            rm ~/.ssh/askpass
+            echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          else
+            ssh-keygen -y -P '' -f ~/.ssh/id_ed25519 >/dev/null
+          fi
+      - name: Deploy on VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+          VPS_ENV: ${{ secrets.VPS_ENV }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USERNAME: ${{ github.actor }}
+          IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$VPS_HOST" && test -n "$VPS_USER" && test -n "$VPS_ENV"
+          VPS_APP_DIR="${VPS_APP_DIR:-/opt/siklus/ml}"
+          [[ "$VPS_HOST" =~ ^[a-zA-Z0-9.-]+$ ]] && [[ "$VPS_USER" =~ ^[a-zA-Z0-9_-]+$ ]]
+          [[ "$VPS_APP_DIR" =~ ^/[a-zA-Z0-9_./-]+$ ]] && [[ "$VPS_APP_DIR" != *..* ]]
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
+          scp docker-compose.yml scripts/deploy.sh "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/"
+          printf '%s\n' "$VPS_ENV" | ssh "$VPS_USER@$VPS_HOST" "umask 077; cat > '$VPS_APP_DIR/.env'"
+          printf '%s' "$GHCR_TOKEN" | ssh "$VPS_USER@$VPS_HOST" "set -eu; config=\$(mktemp -d); export DOCKER_CONFIG=\$config; trap 'rm -rf -- \$DOCKER_CONFIG' EXIT; docker login ghcr.io -u '$GHCR_USERNAME' --password-stdin; cd '$VPS_APP_DIR'; bash deploy.sh '$IMAGE'"
+      - name: Clean SSH credentials
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519 ~/.ssh/askpass

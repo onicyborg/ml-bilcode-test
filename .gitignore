@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+
+.env*
+!.env.example
+*.log
+*.pem
+*.key
+*.jks
+*.keystore
+experiments/
+artifacts/*/
