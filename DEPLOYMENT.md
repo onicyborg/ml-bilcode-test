@@ -9,3 +9,5 @@ Deploy ML first, then backend, then frontend. Shared Docker network is siklus. S
 The runtime env file and temporary registry login are not baked into images. Protect environment secrets and branch deployment permissions. Failed readiness fails the workflow; automatic rollback is not implemented. Roll back by redeploying a previously verified SHA image. Run one API instance so the in-process daily purge scheduler does not duplicate work.
 
 For frontend hosted on Vercel instead, use its Git integration and configure development as the deployment branch; disable the VPS workflow if it is not used. The Next.js proxy still has Vercel upload-size limits that require a separate upload-flow adjustment before full 5 MiB support.
+
+Host port mapping: `127.0.0.1:8100:8000`. A reverse proxy running directly on the VPS should route `https://ml-bilcode-test.hompimpa.biz.id` to `127.0.0.1:8100`. Keep the application port at 8000. Verify host port 8100 is unused before deploying. If the proxy runs inside Docker, use a shared network and the container service address instead of host loopback.
