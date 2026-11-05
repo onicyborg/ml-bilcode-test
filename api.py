@@ -64,7 +64,7 @@ async def lifespan(app):
         app.state.model = model
         app.state.version = metadata["modelVersion"]
     except (OSError, ValueError, KeyError, cv2.error):
-        logger.error("Model could not be loaded. Check MODEL_DIR and exported artifacts.")
+        logger.exception("Model could not be loaded. Check MODEL_DIR and exported artifacts.")
     yield
     app.state.model = None
 
